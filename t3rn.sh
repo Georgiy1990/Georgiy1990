@@ -150,7 +150,7 @@ auto_restart_node() {
 
     while true; do
       restart_node
-      sleep 7200
+      sleep 1200
     done
 
     exec bash
