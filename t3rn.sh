@@ -32,10 +32,11 @@ update_node() {
   export EXECUTOR_PROCESS_ORDERS="true"
   export EXECUTOR_PROCESS_CLAIMS="true"
   export PRIVATE_KEY_LOCAL="$PRIVATE_KEY_LOCAL"
-  export ENABLED_NETWORKS="arbitrum-sepolia,base-sepolia,optimism-sepolia,l1rn"
+  export ENABLED_NETWORKS="arbitrum-sepolia,base-sepolia,optimism-sepolia,blast-sepolia,l1rn"
   export RPC_ENDPOINTS_BSSP="https://base-sepolia.g.alchemy.com/v2/dc7hIXRVwC7GjP1kSGSlw21I0VmzP1U-"
   export RPC_ENDPOINTS_OPSP="https://opt-sepolia.g.alchemy.com/v2/dc7hIXRVwC7GjP1kSGSlw21I0VmzP1U-"
   export RPC_ENDPOINTS_ARBT="https://arb-sepolia.g.alchemy.com/v2/dc7hIXRVwC7GjP1kSGSlw21I0VmzP1U-"
+  export RPC_ENDPOINTS_BLSS="https://blast-sepolia.g.alchemy.com/v2/dc7hIXRVwC7GjP1kSGSlw21I0VmzP1U-"
   export RPC_ENDPOINTS_L1RN='https://brn.rpc.caldera.xyz/'
   export EXECUTOR_MAX_L3_GAS_PRICE=1000
   export EXECUTOR_PROCESS_PENDING_ORDERS_FROM_API="false"
@@ -80,10 +81,11 @@ download_node() {
   export EXECUTOR_PROCESS_ORDERS="true"
   export EXECUTOR_PROCESS_CLAIMS="true"
   export PRIVATE_KEY_LOCAL="$PRIVATE_KEY_LOCAL"
-  export ENABLED_NETWORKS="arbitrum-sepolia,base-sepolia,optimism-sepolia,l1rn"
+  export ENABLED_NETWORKS="arbitrum-sepolia,base-sepolia,optimism-sepolia,blast-sepolia,l1rn"
   export RPC_ENDPOINTS_BSSP="https://base-sepolia.g.alchemy.com/v2/dc7hIXRVwC7GjP1kSGSlw21I0VmzP1U-"
   export RPC_ENDPOINTS_OPSP="https://opt-sepolia.g.alchemy.com/v2/dc7hIXRVwC7GjP1kSGSlw21I0VmzP1U-"
   export RPC_ENDPOINTS_ARBT="https://arb-sepolia.g.alchemy.com/v2/dc7hIXRVwC7GjP1kSGSlw21I0VmzP1U-"
+  export RPC_ENDPOINTS_BLSS="https://blast-sepolia.g.alchemy.com/v2/dc7hIXRVwC7GjP1kSGSlw21I0VmzP1U-"
   export RPC_ENDPOINTS_L1RN='https://brn.rpc.caldera.xyz/'
   export EXECUTOR_MAX_L3_GAS_PRICE=1000
   export EXECUTOR_PROCESS_PENDING_ORDERS_FROM_API="false"
