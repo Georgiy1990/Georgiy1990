@@ -1,256 +1,101 @@
-channel_logo() {
-  echo -e '\033[0;31m'
-  echo -e '┌┐ ┌─┐┌─┐┌─┐┌┬┐┬┬ ┬  ┌─┐┬ ┬┌┐ ┬┬  '
-  echo -e '├┴┐│ ││ ┬├─┤ │ │└┬┘  └─┐└┬┘├┴┐││  '
-  echo -e '└─┘└─┘└─┘┴ ┴ ┴ ┴ ┴   └─┘ ┴ └─┘┴┴─┘'
-  echo -e '\e[0m'
-  echo -e "\n\nПодпишись на самый 4ekHyTbIu* канал в крипте @bogatiy_sybil [💸]"
-}
+#!/bin/bash
 
-update_node() {
-  delete_node
+# Function to handle the apt lock issue
+handle_apt_lock() {
+    local timeout=30  # Timeout in seconds to wait for the lock
+    local interval=2  # Interval in seconds between checks
+    local elapsed=0
 
-  if [ -d "$HOME/executor" ] || screen -list | grep -q "\.t3rnnode"; then
-    echo 'Папка executor или сессия t3rnnode уже существуют. Установка невозможна. Выберите удалить ноду или выйти из скрипта.'
-    return
-  fi
-
-  echo 'Начинаю обновление ноды...'
-
-  read -p "Введите ваш приватный ключ: " PRIVATE_KEY_LOCAL
-
-  cd $HOME
-
-  sudo wget https://github.com/t3rn/executor-release/releases/download/v0.33.0/executor-linux-v0.33.0.tar.gz -O executor-linux.tar.gz
-  sudo tar -xzvf executor-linux.tar.gz
-  sudo rm -rf executor-linux.tar.gz
-  cd executor
-
-  export NODE_ENV="testnet"
-  export LOG_LEVEL="debug"
-  export LOG_PRETTY="false"
-  export EXECUTOR_PROCESS_ORDERS="true"
-  export EXECUTOR_PROCESS_CLAIMS="true"
-  export PRIVATE_KEY_LOCAL="$PRIVATE_KEY_LOCAL"
-  export ENABLED_NETWORKS="arbitrum-sepolia,base-sepolia,optimism-sepolia,blast-sepolia,l1rn"
-  export RPC_ENDPOINTS_BSSP="https://base-sepolia.g.alchemy.com/v2/-nHslH9qgio-NLyhsVMSMSDhahu-vfJH"
-  export RPC_ENDPOINTS_OPSP="https://opt-sepolia.g.alchemy.com/v2/-nHslH9qgio-NLyhsVMSMSDhahu-vfJH"
-  export RPC_ENDPOINTS_ARBT="https://arb-sepolia.g.alchemy.com/v2/-nHslH9qgio-NLyhsVMSMSDhahu-vfJH"
-  export RPC_ENDPOINTS_BLSS="https://blast-sepolia.g.alchemy.com/v2/-nHslH9qgio-NLyhsVMSMSDhahu-vfJH"
-  export RPC_ENDPOINTS_L1RN='https://brn.rpc.caldera.xyz/'
-  export EXECUTOR_MAX_L3_GAS_PRICE=2000
-  export EXECUTOR_PROCESS_PENDING_ORDERS_FROM_API="false"
-
-  cd $HOME/executor/executor/bin/
-
-  screen -dmS t3rnnode bash -c '
-    echo "Начало выполнения скрипта в screen-сессии"
-
-    cd $HOME/executor/executor/bin/
-    ./executor
-
-    exec bash
-  '
-
-  echo "Screen сессия 't3rnnode' создана и нода запущена..."
-}
-
-download_node() {
-  if [ -d "$HOME/executor" ] || screen -list | grep -q "\.t3rnnode"; then
-    echo 'Папка executor или сессия t3rnnode уже существуют. Установка невозможна. Выберите удалить ноду или выйти из скрипта.'
-    return
-  fi
-
-  echo 'Начинаю установку ноды...'
-
-  read -p "Введите ваш приватный ключ: " PRIVATE_KEY_LOCAL
-
-  sudo apt update -y && sudo apt upgrade -y
-  sudo apt-get install make screen build-essential software-properties-common curl git nano jq -y
-
-  cd $HOME
-
-  sudo wget https://github.com/t3rn/executor-release/releases/download/v0.33.0/executor-linux-v0.33.0.tar.gz -O executor-linux.tar.gz
-  sudo tar -xzvf executor-linux.tar.gz
-  sudo rm -rf executor-linux.tar.gz
-  cd executor
-
-  export NODE_ENV="testnet"
-  export LOG_LEVEL="debug"
-  export LOG_PRETTY="false"
-  export EXECUTOR_PROCESS_ORDERS="true"
-  export EXECUTOR_PROCESS_CLAIMS="true"
-  export PRIVATE_KEY_LOCAL="$PRIVATE_KEY_LOCAL"
-  export ENABLED_NETWORKS="arbitrum-sepolia,base-sepolia,optimism-sepolia,blast-sepolia,l1rn"
-  export RPC_ENDPOINTS_BSSP="https://base-sepolia.g.alchemy.com/v2/-nHslH9qgio-NLyhsVMSMSDhahu-vfJH"
-  export RPC_ENDPOINTS_OPSP="https://opt-sepolia.g.alchemy.com/v2/-nHslH9qgio-NLyhsVMSMSDhahu-vfJH"
-  export RPC_ENDPOINTS_ARBT="https://arb-sepolia.g.alchemy.com/v2/-nHslH9qgio-NLyhsVMSMSDhahu-vfJH"
-  export RPC_ENDPOINTS_BLSS="https://blast-sepolia.g.alchemy.com/v2/-nHslH9qgio-NLyhsVMSMSDhahu-vfJH"
-  export RPC_ENDPOINTS_L1RN='https://brn.rpc.caldera.xyz/'
-  export EXECUTOR_MAX_L3_GAS_PRICE=2000
-  export EXECUTOR_PROCESS_PENDING_ORDERS_FROM_API="false"
-
-  cd $HOME/executor/executor/bin/
-
-  screen -dmS t3rnnode bash -c '
-    echo "Начало выполнения скрипта в screen-сессии"
-
-    cd $HOME/executor/executor/bin/
-    ./executor
-
-    exec bash
-  '
-
-  echo "Screen сессия 't3rnnode' создана и нода запущена..."
-}
-
-check_logs() {
-  if screen -list | grep -q "\.t3rnnode"; then
-    screen -S t3rnnode -X hardcopy /tmp/screen_log.txt && sleep 0.1 && tail -n 100 /tmp/screen_log.txt && rm /tmp/screen_log.txt
-  else
-    echo "Сессия t3rnnode не найдена."
-  fi
-}
-
-change_fee() {
-    echo 'Начинаю изменение комиссии...'
-
-    if [ ! -d "$HOME/executor" ]; then
-        echo 'Папка executor не найдена. Установите ноду.'
-        return
-    fi
-
-    read -p 'На какой газ GWEI вы хотите изменить? (по стандарту 105) ' GWEI_SET
-    
-    cd $HOME/executor
-    export EXECUTOR_MAX_L3_GAS_PRICE=$GWEI_SET
-
-    echo 'Перезагружаю ноду...'
-
-    restart_node
-
-    echo 'Комиссия была изменена.'
-}
-
-stop_node() {
-  echo 'Начинаю остановку...'
-
-  if screen -list | grep -q "\.t3rnnode"; then
-    screen -S t3rnnode -p 0 -X stuff "^C"
-    echo "Нода была остановлена."
-  else
-    echo "Сессия t3rnnode не найдена."
-  fi
-}
-
-auto_restart_node() {
-  if screen -list | grep -q "\.t3rnnode_auto"; then
-    sudo screen -X -S t3rnnode_auto quit
-    echo 'У вас уже был существующий скрин t3rnnode_auto. Он был удален'
-  else
-    echo 'Начинаю запуск...'
-  fi
-
-  screen -dmS t3rnnode_auto bash -c '
-    echo "Начало выполнения скрипта в screen-сессии"
-
-    while true; do
-      restart_node
-      sleep 600
+    echo "Checking for apt lock..."
+    while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+        if [ $elapsed -ge $timeout ]; then
+            echo "Timeout reached. Killing the process holding the lock..."
+            # Get the PID of the process holding the lock and kill it
+            local pid=$(sudo fuser -v /var/lib/dpkg/lock-frontend 2>/dev/null | awk '{print $1}')
+            if [ -n "$pid" ]; then
+                echo "Killing process $pid..."
+                sudo kill -9 $pid
+            fi
+            sudo rm -f /var/lib/dpkg/lock-frontend
+            sudo rm -f /var/lib/dpkg/lock
+            break
+        fi
+        echo "Waiting for lock to be released..."
+        sleep $interval
+        elapsed=$((elapsed + interval))
     done
-
-    exec bash
-  '
-
-  echo "Screen сессия 't3rnnode_auto' создана и нода будет перезагружаться каждые 2 часа..."
+    echo "Apt lock cleared."
 }
 
-restart_node() {
-  echo 'Начинаю перезагрузку...'
+handle_apt_lock
+sudo apt install -y curl bc figlet
 
-  session="t3rnnode"
-  
-  if screen -list | grep -q "\.${session}"; then
-    screen -S "${session}" -p 0 -X stuff "^C"
-    sleep 1
-    screen -S "${session}" -p 0 -X stuff "./executor\n"
-    echo "Нода была перезагружена."
-  else
-    echo "Сессия ${session} не найдена."
-  fi
-}
+# Check Ubuntu version
+UBUNTU_VERSION=$(lsb_release -rs)
+if (( $(echo "$UBUNTU_VERSION < 22.04" | bc -l) )); then
+    echo "Minimum required Ubuntu version is 22.04. Update your OS to proceed."
+    exit 1
+fi
 
-delete_node() {
-  echo 'Начинаю удаление ноды...'
+# Read private key from private_key.txt
+if [ ! -f private_key.txt ]; then
+    echo "Error: private_key.txt not found. Please create this file with your private key."
+    exit 1
+fi
+PRIVATE_KEY=$(cat private_key.txt)
 
-  if [ -d "$HOME/executor" ]; then
-    sudo rm -rf $HOME/executor
-    echo "Папка executor была удалена."
-  else
-    echo "Папка executor не найдена."
-  fi
+# Download the latest t3rn executor binary
+LATEST_VERSION=$(curl -s https://api.github.com/repos/t3rn/executor-release/releases/latest | grep 'tag_name' | cut -d\" -f4)
+EXECUTOR_URL="https://github.com/t3rn/executor-release/releases/download/${LATEST_VERSION}/executor-linux-${LATEST_VERSION}.tar.gz"
+curl -L -o executor-linux-${LATEST_VERSION}.tar.gz $EXECUTOR_URL
 
-  if screen -list | grep -q "\.t3rnnode"; then
-    sudo screen -X -S t3rnnode quit
-    echo "Сессия t3rnnode была закрыта."
-  else
-    echo "Сессия t3rnnode не найдена."
-  fi
+# Extract the binary and clean up
+tar -xzvf executor-linux-${LATEST_VERSION}.tar.gz
+rm -rf executor-linux-${LATEST_VERSION}.tar.gz
 
-  sudo screen -X -S t3rnnode_auto quit
+# Create configuration file
+USERNAME=$(whoami)
+HOME_DIR=$(eval echo ~$USERNAME)
+CONFIG_FILE="$HOME_DIR/executor/executor/bin/.t3rn"
 
-  echo "Нода была удалена."
-}
+mkdir -p $(dirname $CONFIG_FILE)
+cat <<EOT > $CONFIG_FILE
+NODE_ENV=testnet
+export EXECUTOR_MAX_L3_GAS_PRICE=1500
+EXECUTOR_PROCESS_ORDERS=true
+ENVIRONMENT=testnet
+PRIVATE_KEY_LOCAL=$PRIVATE_KEY
+ENABLED_NETWORKS='arbitrum-sepolia,base-sepolia,optimism-sepolia,unichain-sepolia,l2rn'
+RPC_ENDPOINTS='{"l2rn": ["https://b2n.rpc.caldera.xyz/http"],"arbt": ["https://arbitrum-sepolia.drpc.org/", "https://sepolia-rollup.arbitrum.io/rpc"],"bast": ["https://base-sepolia-rpc.publicnode.com/", "https://base-sepolia.drpc.org/"],"opst": ["https://sepolia.optimism.io/", "https://optimism-sepolia.drpc.org/"],"unit": ["https://unichain-sepolia.drpc.org/", "https://sepolia.unichain.org/"]
+}'
+EXECUTOR_MAX_L3_GAS_PRICE=500
+EXECUTOR_PROCESS_PENDING_ORDERS_FROM_API=false
+EXECUTOR_PROCESS_ORDERS_API_ENABLED=false
+EXECUTOR_PROCESS_BIDS_BATCH=true
+EXECUTOR_ENABLE_BATCH_BIDDING=true
+EOT
 
-exit_from_script() {
-  exit 0
-}
+# Create systemd service for t3rn
+sudo bash -c "cat <<EOT > /etc/systemd/system/t3rn.service
+[Unit]
+Description=t3rn Service
+After=network.target
 
-while true; do
-    channel_logo
-    sleep 2
-    echo -e "\n\nМеню:"
-    echo "1. 🚀 Установить ноду"
-    echo "2. 📋 Проверить логи ноды"
-    echo "3. 🐾 Изменить комиссию"
-    echo "4. 🛑 Остановить ноду"
-    echo "5. 🔄 Перезапустить ноду"
-    echo "6. 📈 Автоперезагрузка ноды"
-    echo "7. ✅ Обновить ноду"
-    echo "8. 🗑️ Удалить ноду"
-    echo -e "9. 🚪 Выйти из скрипта\n"
-    read -p "Выберите пункт меню: " choice
+[Service]
+EnvironmentFile=$CONFIG_FILE
+ExecStart=$HOME_DIR/executor/executor/bin/executor
+WorkingDirectory=$HOME_DIR/executor/executor/bin/
+Restart=on-failure
+User=$USERNAME
 
-    case $choice in
-      1)
-        download_node
-        ;;
-      2)
-        check_logs
-        ;;
-      3)
-        change_fee
-        ;;
-      4)
-        stop_node
-        ;;
-      5)
-        restart_node
-        ;;
-      6)
-        auto_restart_node
-        ;;
-      7)
-        update_node
-        ;;
-      8)
-        delete_node
-        ;;
-      9)
-        exit_from_script
-        ;;
-      *)
-        echo "Неверный пункт. Пожалуйста, выберите правильную цифру в меню."
-        ;;
-    esac
-  done
+[Install]
+WantedBy=multi-user.target
+EOT"
+
+# Reload systemd and start the service
+sudo systemctl daemon-reload
+sudo systemctl enable t3rn
+sudo systemctl start t3rn
+
+# Display logs command
+echo "To check logs, use: sudo journalctl -u t3rn -f"
